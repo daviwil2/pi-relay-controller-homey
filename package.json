@@ -1,0 +1,17 @@
+{
+  "name": "com.github.noreply.users.espurna",
+  "version": "1.0.2",
+  "main": "app.js",
+  "dependencies": {
+    "@grpc/grpc-js": "^1.2.12",
+    "@grpc/proto-loader": "^0.6.1",
+    "homey-log": "^1.0.6",
+    "is-ip": "^3.0.0",
+    "mqtt": "^4.0.0"
+  },
+  "scripts": {},
+  "repository": {},
+  "author": "David Williamson",
+  "license": "Apache-2.0",
+  "bugs": {}
+}

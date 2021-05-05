@@ -1,0 +1,146 @@
+// service.proto defines the API and messages related to that API
+
+syntax = "proto3"; // use v3 of the protobuf specification
+
+package com.github.daviwil2.grpc.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// simple API where the client sends a request to the server using a stub and waits for a response,
+// just like a normal function call, not using streaming (the stream keyboard prefixing the parameter)
+service PiRelayService {
+
+  // retrieves the available pins and their metadata
+  rpc GetRelays(GetRelaysRequest) returns (GetRelaysResponse);
+
+  // sets the state of a pin
+  rpc SetRelay(SetRelayRequest) returns (SetRelayResponse);
+
+  // changes the name value of a pin
+  rpc RenameRelay(RenameRelayRequest) returns (RenameRelayResponse);
+
+}
+
+/// enums defined for most fields
+
+enum Pin {
+  PIN_UNSPECIFIED = 0;
+  PIN_35 = 1;
+  PIN_33 = 2;
+  PIN_31 = 3;
+  PIN_29 = 4;
+}
+
+enum Relay {
+  RELAY_UNSPECIFIED = 0;
+  RELAY_1 = 1;
+  RELAY_2 = 2;
+  RELAY_3 = 3;
+  RELAY_4 = 4;
+}
+
+enum GPIO {
+  GPIO_UNSPECIFIED = 0;
+  GPIO_19 = 1;
+  GPIO_13 = 2;
+  GPIO_6  = 3;
+  GPIO_5  = 4;
+}
+
+// taken from https://developer.athom.com/docs/apps-reference
+enum Controls {
+  CONTROLS_UNSPECIFIED   = 0;
+  CONTROLS_AMPLIFIER     = 1;
+  CONTROLS_BLINDS        = 2;
+  CONTROLS_COFFEEMACHINE = 3;
+  CONTROLS_CURTAIN       = 4;
+  CONTROLS_FAN           = 5;
+  CONTROLS_GARAGEDOOR    = 6;
+  CONTROLS_HEATER        = 7;
+  CONTROLS_LIGHT         = 8;
+  CONTROLS_LOCK          = 9;
+  CONTROLS_OTHER         = 10;
+  CONTROLS_SOCKET        = 11;
+  CONTROLS_SUNSHADE      = 12;
+  CONTROLS_TV            = 13;
+}
+
+enum Type {
+  TYPE_UNSPECIFIED = 0;
+  TYPE_NO = 1;
+  TYPE_NC = 2;
+}
+
+// define the enums used for the nested message Power
+
+enum PowerType {
+  POWER_TYPE_UNSPECIFIED = 0;
+  POWER_TYPE_AC = 1;
+  POWER_TYPE_DC = 2;
+}
+
+enum Voltage {
+  VOLTAGE_UNSPECIFIED = 0;
+  VOLTAGE_5V   = 1;
+  VOLTAGE_12V  = 2;
+  VOLTAGE_24V  = 3;
+  VOLTAGE_100V = 4;
+  VOLTAGE_110V = 5;
+  VOLTAGE_220V = 6;
+  VOLTAGE_230V = 7;
+  VOLTAGE_240V = 8;
+}
+
+/// define messages for each type of data to be returned
+
+message Power {
+  PowerType type = 1;
+  Voltage voltage = 2;
+}
+
+message PiRelay {
+  Pin pin           = 1; // the pin number [29, 31, 33 or 35] for the SB Components shield
+  Relay relay       = 2; // the relay number linked to the pin number [1-4]
+  GPIO gpio         = 3; // the GPIO number linked to the pin number [19, 13, 6, 5]
+  string name       = 4;
+  Controls controls = 5; // text description of what it controls from the enum list
+  Type type         = 6;
+  bool state        = 7; // 1 for activated, 0 for not activated
+  Power power       = 8;
+  reserved "MQTTtopic";  // reserve this field name for future use
+  reserved 9;            // with this corresponding field number
+}
+
+/// these are the messages that are received and sent in response to API calls in the service block at the top
+
+// no parameters are expected as all pins are returned
+message GetRelaysRequest {
+  optional Relay relay = 1; // specifying a relay is options; if ommitted then all relays will be retruned
+}
+
+message GetRelaysResponse {
+  repeated PiRelay piRelays = 1; // returns an array of PiRelay objects
+}
+
+message SetRelayRequest {
+  Relay relay = 1; // enum defined above
+  bool state = 2;
+}
+
+message SetRelayResponse {
+  google.protobuf.Timestamp timestamp = 1; // per https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#timestamp
+  Relay relay    = 2; // enum the relay number [1-4] for the SB Components shield
+  bool succeeded = 3; // did the change to turn on or off succeed? 1 = yes, 0 = no
+  bool state     = 4; // the new current state
+}
+
+message RenameRelayRequest {
+  Relay relay = 1; // enum defined above
+  string newName = 2;
+}
+
+message RenameRelayResponse {
+  google.protobuf.Timestamp timestamp = 1; // per https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#timestamp
+  Relay relay    = 2; // enum the relay number [1-4] for the SB Components shield
+  bool succeeded = 3; // did the change to turn on or off succeed? 1 = yes, 0 = no
+};

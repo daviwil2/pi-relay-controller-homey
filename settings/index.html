@@ -1,0 +1,102 @@
+<!-- ./settings/index.html contains the settings interface -->
+
+<!doctype html>
+<html>
+
+  <head>
+    <script type="text/javascript" src="/homey.js" data-origin="settings"></script>
+  </head>
+
+  <body>
+    <h1>gRPC Server Settings</h1>
+    <div id="mqtt">
+      <div class="field row">
+        <label for="address">gRPC server FQDN or IP address</label>
+        <input id="address" type="text" value="" />
+      </div>
+      <div class="field row">
+        <label for="port">gRPC server port</label>
+        <input id="port" type="text" value="" />
+      </div>
+      <br>
+      <button id="save" class="right">Save changes</button>
+    </div>
+  </body>
+
+</html>
+
+<script type="text/javascript">
+
+  // wait for Homey to be available
+  function onHomeyReady(Homey){
+
+    // initialise the object with handles to the form fields
+    const FIELDS = ['address', 'port'];
+    var fields = {};
+    FIELDS.forEach((field, index) => {
+      fields[field] = document.getElementById(field)
+    }); // .forEach
+
+    var saveButton = document.getElementById('save');
+    let error;
+
+    // try to retrieve the field values from settings and populate the field values
+    error = false;
+    FIELDS.forEach((field, index) => {
+      if (error === false){
+        Homey.get(field, function(err, data) {
+          if (err){
+            error = err;
+          } else {
+            if (field === 'port' && !data){ data = '50051' }; // default to port 50051 if data is falsey
+            fields[field].value = data // assume data is valid
+          }; // if
+        }); // Homey.get
+      }; // if
+    }); // .forEach
+
+    // trap for error
+    if (error){ return Homey.alert(err) };
+
+    // add an event listener for the save button
+    error = false;
+    saveButton.addEventListener('click', function(e){
+
+      // iterate over the fields, retrieving the value from the form and storing in Homey
+      FIELDS.forEach((field, index) => {
+        if (error === false){
+          Homey.set(field, fields[field].value, function( err ){
+            if (err){ error = err };
+          }); // Homey.set
+        }; // if
+      }); // .forEach
+
+      // if we encountered an error tell the user, else show success dialog
+      if (error !== false){
+        return Homey.alert(error)
+      } else {
+        Homey.confirm('Your settings have been saved', 'info');
+      }; // if
+
+    }); // saveButton.addEventListener click
+
+    // show the settings view
+    // the settings view is hidden until this method has been called so that API calls can be made to avoid flickering on screen
+    Homey.ready();
+
+  }; // onHomeyReady
+
+  /*
+  Homey.get( [String name,] Function callback ) // Gets a single setting's value when name is provided, or an object with all settings when name is omitted.
+  Homey.set( String name, Mixed value, Function callback ) // Sets a single setting's value. The value must be JSON-serializable.
+  Homey.unset( String name, Function callback ) // Unsets a single setting's value.
+  Homey.on( String event, Function callback ) // Register an event listener for your app's realtime events. System events when modifying settings are: settings.set, settings.unset
+  Homey.api( String method, String path, Mixed body, Function callback ) // make a call to your app's Web API
+  Homey.alert( String message[, String icon], Function callback ) // Show an alert dialog. The second parameter icon can be null, error, warning or info.
+  Homey.confirm( String message[, String icon], Function callback ) // Show a confirm dialog. The second parameter icon can be null, error, warning or info. The callback's 2nd argument will be true when the user pressed OK.
+  Homey.popup( String url[, Object opts] ) // Show a popup (new window). The object opts can optionally have a width and height property of type number. The default width and height is 400.
+  Homey.openURL( String url ) // Show a new window.
+  Homey.__( String key [, Object tokens] ) // Translate a string programmatically. The first argument key is the name in your /locales/__language__.json
+  */
+
+</script>

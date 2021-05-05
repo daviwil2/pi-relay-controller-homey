@@ -1,0 +1,82 @@
+{
+  "id": "com.github.noreply.users.pi-relay-controller-homey",
+  "version": "1.0.0",
+  "compatibility": ">=2.0",
+  "sdk": 2,
+  "brandColor": "#99965E",
+  "name": {
+    "en": "Pi Relay Controller"
+  },
+  "description": {
+    "en": "Control relay shield on Raspberry Pi over gRPC"
+  },
+  "category": [],
+  "tags": {
+    "en": []
+  },
+  "images": {
+    "large": "/assets/images/large.png",
+    "small": "/assets/images/small.png"
+  },
+  "permissions": [],
+  "author": {
+    "email": "daviwil2@users.noreply.github.com",
+    "name": "David Williamson"
+  },
+  "contributors": {},
+  "contributing": {},
+  "bugs": {
+    "url": "https://github.com/daviwil2/Pi-Relay-Controller-Homey/issues"
+  },
+  "signals": {},
+  "flow": {},
+  "drivers": [
+    {
+      "id": "PiRelayController",
+      "discovery": "pi-relay-controller",
+      "name": {
+        "en": "Raspbery Pi Relay Controller"
+      },
+      "class": "socket",
+      "capabilities": [ "onoff" ],
+      "images": {
+        "large": "/drivers/pi-relay-controller/assets/images/large.png",
+        "small": "/drivers/pi-relay-controller/assets/images/small.png"
+      },
+      "pair": [
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": { "next": "add_my_devices" },
+          "options": { "singular": false }
+        },
+        {
+          "id": "add_my_devices",
+          "template": "add_devices"
+        }
+      ],
+      "settings": []
+    }
+  ],
+  "discovery": {
+    "pi-relay-controller": {
+      "type": "mdns-sd",
+      "mdns-sd": {
+        "name": "grpc",
+        "protocol": "tcp"
+      },
+      "id": "{{txt.id}}",
+      "conditions": [
+        [
+          {
+            "field": "txt.id",
+            "match": {
+              "type": "regex",
+              "value": "^pi-relay"
+            }
+          }
+        ]
+      ]
+    }
+  }
+}
