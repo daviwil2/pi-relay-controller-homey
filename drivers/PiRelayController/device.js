@@ -211,14 +211,18 @@ module.exports = class PiRelayController extends Homey.Device {
     client.GetRelays({relay: relay}, (err, data) => {
 
       if (err){
+
         this._log('error calling client.getRelays() over insecure gRPC connection to '+settings.address+':'+settings.port+', exiting');
-        process.exit(0);
+        process.exit(0); // exit the app; the app can be restarted using the Homey client app
+
       } else {
+
         let obj = data.piRelays[0]; // get the first, and only, item in the array of relays returned over gRPC
         let stateText = (obj.state === true) ? 'on' : 'off' ;
         this.setCapabilityValue('onoff', obj.state)
           .then(() => { this._log('relay '+relay.toString()+' initial state set as '+stateText) })
           .catch((err) => { this._log('error returned when setting initial state: '+err.message) });
+
       }; // if
 
     }); // client.GetRelays
@@ -227,11 +231,13 @@ module.exports = class PiRelayController extends Homey.Device {
 
   // called when the user renames the device
   onRenamed(newName){
+
     this._renameRelay(newName).then(() => {
       this._log('successfully saved the new name via gRPC call')
     }).catch((err) => {
       this._log('error saving new name: '+err.message)
     }); // this._renameRelay
+
   }; // onRenamed
 
 }; // module.exports
