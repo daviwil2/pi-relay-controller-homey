@@ -191,8 +191,8 @@ module.exports = class PiRelayController extends Homey.Device {
 
     this._connectClient(); // ensure we have a gRPC client
 
-    let name         = this.getName();
-    let relay        = this.getData().id;
+    let name  = this.getName();
+    let relay = this.getData().id;
 
     // register a capability listener to reach to changes in state (on/off) in the Homey UI
     this._log('registering capability listener in onInit() in device.js');
@@ -211,7 +211,7 @@ module.exports = class PiRelayController extends Homey.Device {
     client.GetRelays({relay: relay}, (err, data) => {
 
       if (err){
-        this._log('error calling getRelays() over insecure gRPC connection to '+settings.address+':'+settings.port);
+        this._log('error calling client.getRelays() over insecure gRPC connection to '+settings.address+':'+settings.port+', exiting');
         process.exit(0);
       } else {
         let obj = data.piRelays[0]; // get the first, and only, item in the array of relays returned over gRPC
